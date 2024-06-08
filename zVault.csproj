@@ -53,8 +53,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AiGeneratedFileEncryption.cs" />
-    <Compile Include="Crypto.cs" />
     <Compile Include="CryptoV2.cs" />
     <Compile Include="ExitCodes.cs" />
     <Compile Include="Form1.cs">
