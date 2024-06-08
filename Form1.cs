@@ -16,9 +16,7 @@ namespace zVault
         string[] files = null;
         bool linkedOpen = false;
         bool disableLinkedDrop = true;
-
         bool disableDragDrop = false;
-
         CancellationTokenSource cancellationSource = new CancellationTokenSource();
         private CancellationToken cancellation;
 
@@ -30,8 +28,6 @@ namespace zVault
 
         private void Form1_Load(object sender, EventArgs e)
         {
-
-            //if(Process.GetProcessesByName("zVault").Length > 1) Environment.Exit(0);
             midTextDefault = MidTxt.Text;
             midHeightDefault = MidTxt.Height;
             Panel.Enabled = false;
@@ -52,7 +48,7 @@ namespace zVault
         private void Form1_DragEnter(object sender, DragEventArgs e)
         {
             if (disableLinkedDrop && linkedOpen) return;
-            if(disableDragDrop) return;
+            if (disableDragDrop) return;
             string[] _files = (string[])e.Data.GetData(DataFormats.FileDrop, false);
             if (File.Exists(_files[0])) e.Effect = DragDropEffects.Copy;
             Transition.run(this, "BackColor", Color.White, new TransitionType_EaseInEaseOut(150));
@@ -135,13 +131,14 @@ namespace zVault
             cancellation = cancellationSource.Token;
             Task.Run(async () => await Crypto(PassBox.Text, files)).ContinueWith(a =>
             {
-                if(!a.IsFaulted) disableDragDrop = false;
+                if (!a.IsFaulted) disableDragDrop = false;
             });
         }
 
         private void BtnCancel_Click(object sender, EventArgs e)
         {
             PassBox.Enabled = true;
+            PassBox.Focus();
             disableDragDrop = false;
 
             if (linkedOpen) Environment.Exit(0);
@@ -158,8 +155,9 @@ namespace zVault
             Panel.Hide();
             Panel.Enabled = false;
             PassBox.Enabled = true;
+            PassBox.Focus();
+
             BtnProceed.Enabled = true;
-            BtnProceed.Focus();
         }
 
         private async Task Crypto(string password, string[] files)
@@ -202,12 +200,10 @@ namespace zVault
                                 Panel.Hide();
                                 Panel.Enabled = false;
                                 BtnProceed.Enabled = true;
-                                BtnProceed.Focus();
                             });
                         }
                         else
                         {
-
                             string error = "unknown error";
                             if (ex is CryptographicException)
                             {
@@ -225,7 +221,6 @@ namespace zVault
                             {
                                 Transition.run(this.Title, "Text", "Error Occurred", new TransitionType_EaseInEaseOut(250));
                             });
-
                         }
                     }
                     if (result == null)
@@ -234,8 +229,8 @@ namespace zVault
                         {
                             this.MidTxt.Text = String.Format("Enter the password for {0}", files.Length > 1 ? files.Length + " files" : Path.GetFileName(files[0].Replace(".zv", "")));
                             this.BtnProceed.Enabled = true;
-                            BtnProceed.Focus();
                             this.PassBox.Enabled = true;
+                            PassBox.Focus();
                         });
                         return;
                     }
@@ -253,9 +248,10 @@ namespace zVault
                                 this.MidTxt.Text = string.Format("Encrypting {0} - ({3}%)", Path.GetFileName(file), completed + 1, files.Length, progress);
                             });
                         }));
-                    } catch (Exception ex)
+                    }
+                    catch (Exception ex)
                     {
-                        if(ex is TaskCanceledException)
+                        if (ex is TaskCanceledException)
                         {
                             this.Invoke((MethodInvoker)async delegate
                             {
@@ -286,6 +282,7 @@ namespace zVault
                 this.PassBox.Invoke((MethodInvoker)delegate
                 {
                     this.PassBox.Enabled = true;
+                    PassBox.Focus();
                 });
             }
 

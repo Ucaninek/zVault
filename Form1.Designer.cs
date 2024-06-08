@@ -111,6 +111,7 @@
             this.BtnCancel.Name = "BtnCancel";
             this.BtnCancel.Size = new System.Drawing.Size(90, 36);
             this.BtnCancel.TabIndex = 7;
+            this.BtnCancel.TabStop = false;
             this.BtnCancel.Text = "Cancel";
             this.BtnCancel.UseVisualStyleBackColor = true;
             this.BtnCancel.Click += new System.EventHandler(this.BtnCancel_Click);
@@ -123,6 +124,7 @@
             this.BtnProceed.Name = "BtnProceed";
             this.BtnProceed.Size = new System.Drawing.Size(169, 36);
             this.BtnProceed.TabIndex = 6;
+            this.BtnProceed.TabStop = false;
             this.BtnProceed.Text = "Proceed";
             this.BtnProceed.UseVisualStyleBackColor = true;
             this.BtnProceed.Click += new System.EventHandler(this.BtnProceed_Click);
