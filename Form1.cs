@@ -15,7 +15,9 @@ namespace zVault
         int? midHeightDefault = null;
         string[] files = null;
         bool linkedOpen = false;
-        bool linkedDisableDrop = true;
+        bool disableLinkedDrop = true;
+
+        bool disableDragDrop = false;
 
         CancellationTokenSource cancellationSource = new CancellationTokenSource();
         private CancellationToken cancellation;
@@ -40,7 +42,7 @@ namespace zVault
                 if (File.Exists(args[1]))
                 {
                     linkedOpen = true;
-                    linkedDisableDrop = linkedOpen;
+                    disableLinkedDrop = linkedOpen;
                     this.TopMost = true;
                     ProcessFiles(new string[] { args[1] });
                 }
@@ -49,7 +51,8 @@ namespace zVault
 
         private void Form1_DragEnter(object sender, DragEventArgs e)
         {
-            if (linkedDisableDrop && linkedOpen) return;
+            if (disableLinkedDrop && linkedOpen) return;
+            if(disableDragDrop) return;
             string[] _files = (string[])e.Data.GetData(DataFormats.FileDrop, false);
             if (File.Exists(_files[0])) e.Effect = DragDropEffects.Copy;
             Transition.run(this, "BackColor", Color.White, new TransitionType_EaseInEaseOut(150));
@@ -65,6 +68,7 @@ namespace zVault
 
         private void Form1_DragLeave(object sender, EventArgs e)
         {
+            if (disableDragDrop) return;
             Transition.run(this, "BackColor", SystemColors.Control, new TransitionType_EaseInEaseOut(150));
             Transition.run(MidTxt, "Text", midTextDefault, new TransitionType_EaseInEaseOut(250));
         }
@@ -73,6 +77,7 @@ namespace zVault
         {
             e.Effect = DragDropEffects.None;
             string[] files = (string[])e.Data.GetData(DataFormats.FileDrop, false);
+            disableDragDrop = true;
             ProcessFiles(files);
         }
 
@@ -128,17 +133,23 @@ namespace zVault
             PassBox.Enabled = false;
             cancellationSource = new CancellationTokenSource(); // Reset the cancellation source
             cancellation = cancellationSource.Token;
-            Task.Run(async () => await Crypto(PassBox.Text, files));
+            Task.Run(async () => await Crypto(PassBox.Text, files)).ContinueWith(a =>
+            {
+                if(!a.IsFaulted) disableDragDrop = false;
+            });
         }
 
         private void BtnCancel_Click(object sender, EventArgs e)
         {
             PassBox.Enabled = true;
-            cancellationSource.Cancel();
+            disableDragDrop = false;
 
             if (linkedOpen) Environment.Exit(0);
-            //Title.Text = "Welcome Back";
-            //MidTxt.Text = midTextDefault;
+            Title.Text = "Welcome Back";
+            MidTxt.Text = midTextDefault;
+
+            cancellationSource.Cancel(); //cancel after text change so detailed text from Crypto can be shown
+
             Transition t = new Transition(new TransitionType_EaseInEaseOut(250));
             t.add(MidTxt, "Height", midHeightDefault);
             t.add(this, "BackColor", SystemColors.Control);
@@ -148,6 +159,7 @@ namespace zVault
             Panel.Enabled = false;
             PassBox.Enabled = true;
             BtnProceed.Enabled = true;
+            BtnProceed.Focus();
         }
 
         private async Task Crypto(string password, string[] files)
@@ -190,6 +202,7 @@ namespace zVault
                                 Panel.Hide();
                                 Panel.Enabled = false;
                                 BtnProceed.Enabled = true;
+                                BtnProceed.Focus();
                             });
                         }
                         else
@@ -221,6 +234,7 @@ namespace zVault
                         {
                             this.MidTxt.Text = String.Format("Enter the password for {0}", files.Length > 1 ? files.Length + " files" : Path.GetFileName(files[0].Replace(".zv", "")));
                             this.BtnProceed.Enabled = true;
+                            BtnProceed.Focus();
                             this.PassBox.Enabled = true;
                         });
                         return;
@@ -284,7 +298,7 @@ namespace zVault
                 this.Panel.Hide();
                 this.Panel.Enabled = false;
                 this.BtnProceed.Enabled = true;
-                this.linkedDisableDrop = false;
+                this.disableLinkedDrop = false;
             });
         }
     }
