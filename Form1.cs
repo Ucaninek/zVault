@@ -17,13 +17,12 @@ namespace zVault
         bool linkedOpen = false;
         bool linkedDisableDrop = true;
 
-        CancellationTokenSource cancellationSource = new CancellationTokenSource();
+        CancellationTokenSource cancellationSource;
         private CancellationToken cancellation;
 
         public Form1()
         {
             InitializeComponent();
-            cancellation = cancellationSource.Token;
         }
 
         private void Form1_Load(object sender, EventArgs e)
