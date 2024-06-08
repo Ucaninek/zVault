@@ -167,19 +167,18 @@ namespace zVault
 
             foreach (string file in files)
             {
-                fileEncrypted = file.EndsWith(".zv") || file.EndsWith(".zVault");
-                this.Invoke((MethodInvoker)delegate
+                try
                 {
-                    Transition.run(this.Title, "Text", (fileEncrypted ? "Unlocking" : "Locking"), new TransitionType_EaseInEaseOut(250));
-                });
-                this.Invoke((MethodInvoker)delegate { MidTxt.Text = String.Format("Reading file {1} of {2}", Path.GetFileName(file), completed + 1, files.Length); });
-                byte[] result = null;
-                this.Invoke((MethodInvoker)delegate { MidTxt.Text = String.Format("({1} of {2}) Processing {0}", Path.GetFileName(file), completed + 1, files.Length); });
-                if (fileEncrypted) //going to be decrypted
-                {
-                    try
+                    fileEncrypted = file.EndsWith(".zv") || file.EndsWith(".zVault");
+                    this.Invoke((MethodInvoker)delegate
                     {
-                        result = await zVault.Crypto.DecryptFileAsync(file, password, cancellation, new Progress<int>(progress =>
+                        Transition.run(Title, "Text", (fileEncrypted ? "Unlocking" : "Locking"), new TransitionType_EaseInEaseOut(250));
+                    });
+                    this.Invoke((MethodInvoker)delegate { MidTxt.Text = String.Format("Reading file {1} of {2}", Path.GetFileName(file), completed + 1, files.Length); });
+                    this.Invoke((MethodInvoker)delegate { MidTxt.Text = String.Format("({1} of {2}) Processing {0}", Path.GetFileName(file), completed + 1, files.Length); });
+                    if (fileEncrypted) //going to be decrypted
+                    {
+                        await zVault.Crypto.DecryptFileAsync(file, password, cancellation, new Progress<int>(progress =>
                         {
                             // Update the progress UI
                             this.Invoke((MethodInvoker)delegate
@@ -187,116 +186,94 @@ namespace zVault
                                 MidTxt.Text = string.Format("Decrypting {0} - ({3}%)", Path.GetFileName(file), completed + 1, files.Length, progress);
                             });
                         }));
+
                     }
-                    catch (Exception ex)
-                    {
-                        if (ex is TaskCanceledException)
-                        {
-                            this.Invoke((MethodInvoker)delegate
-                            {
-                                Title.Text = "Cancelled";
-                                MidTxt.Text = String.Format("Completed {0} of {1}, waiting for another one..", completed, files.Length);
-                                MidTxt.Dock = DockStyle.Fill;
-                                Panel.Hide();
-                                Panel.Enabled = false;
-                                BtnProceed.Enabled = true;
-                            });
-                        }
-                        else
-                        {
-                            string error = "unknown error";
-                            if (ex is CryptographicException)
-                            {
-                                if (ex.Message.ToLower().Contains("not a complete block"))
-                                    error = "Supplied file is corrupt";
-                                else if (ex.Message.ToLower().Contains("padding is invalid"))
-                                    error = "Incorrect password";
-                            }
-                            else if (ex is IOException)
-                            {
-                                error = "IO error occurred";
-                            }
-                            this.FastAlert(error);
-                            this.Invoke((MethodInvoker)delegate
-                            {
-                                Transition.run(this.Title, "Text", "Error Occurred", new TransitionType_EaseInEaseOut(250));
-                            });
-                        }
-                    }
-                    if (result == null)
-                    {
-                        this.Invoke((MethodInvoker)delegate
-                        {
-                            this.MidTxt.Text = String.Format("Enter the password for {0}", files.Length > 1 ? files.Length + " files" : Path.GetFileName(files[0].Replace(".zv", "")));
-                            this.BtnProceed.Enabled = true;
-                            this.PassBox.Enabled = true;
-                            PassBox.Focus();
-                        });
-                        return;
-                    }
-                }
-                else
-                {
-                    try
+                    else
                     {
                         // Encrypt the file using IProgress
-                        result = await zVault.Crypto.EncryptFileAsync(file, password, cancellation, new Progress<int>(progress =>
+                        await zVault.Crypto.EncryptFileAsync(file, password, cancellation, new Progress<int>(progress =>
                         {
                             // Update the progress UI
                             this.Invoke((MethodInvoker)delegate
                             {
-                                this.MidTxt.Text = string.Format("Encrypting {0} - ({3}%)", Path.GetFileName(file), completed + 1, files.Length, progress);
+                                MidTxt.Text = string.Format("Encrypting {0} - ({3}%)", Path.GetFileName(file), completed + 1, files.Length, progress);
                             });
                         }));
                     }
-                    catch (Exception ex)
+
+                    if (fileEncrypted) File.Move(file, file.Replace(".zv", ""));
+                    else File.Move(file, file + ".zv");
+
+                    this.Invoke((MethodInvoker)delegate
                     {
-                        if (ex is TaskCanceledException)
+                        Transition.run(Title, "Text", (fileEncrypted ? "Unlocked!" : "Locked!"), new TransitionType_EaseInEaseOut(250));
+                        PassBox.Text = "";
+                        MidTxt.Text = "Cool, waiting for another one..";
+                        MidTxt.Dock = DockStyle.Fill;
+                        Panel.Hide();
+                        Panel.Enabled = false;
+                        BtnProceed.Enabled = true;
+                        disableLinkedDrop = false;
+
+                        Transition t = new Transition(new TransitionType_EaseInEaseOut(250));
+                        t.add(MidTxt, "Height", midHeightDefault);
+                        t.run();
+                    });
+
+                    if (cancellation.IsCancellationRequested) return;
+
+                    completed++;
+
+                    PassBox.Invoke((MethodInvoker)delegate
+                    {
+                        PassBox.Enabled = true;
+                        PassBox.Focus();
+                    });
+                }
+                catch (Exception ex)
+                {
+                    if (ex is TaskCanceledException)
+                    {
+                        this.Invoke((MethodInvoker)delegate
                         {
-                            this.Invoke((MethodInvoker)async delegate
-                            {
-                                await Task.Delay(10);
-                                Title.Text = "Cancelled";
-                                MidTxt.Text = String.Format("Completed {0} of {1}, waiting for another one..", completed, files.Length);
-                                MidTxt.Dock = DockStyle.Fill;
-                                Panel.Hide();
-                                Panel.Enabled = false;
-                                BtnProceed.Enabled = true;
-                            });
+                            Title.Text = "Cancelled";
+                            MidTxt.Text = String.Format("Completed {0} of {1}, waiting for another one..", completed, files.Length);
+                            MidTxt.Dock = DockStyle.Fill;
+                            Panel.Hide();
+                            Panel.Enabled = false;
+                            BtnProceed.Enabled = true;
+                        });
+                    }
+                    else
+                    {
+                        this.Invoke((MethodInvoker)delegate
+                        {
+                            MidTxt.Text = String.Format("Enter the password for {0}", files.Length > 1 ? files.Length + " files" : Path.GetFileName(files[0].Replace(".zv", "")));
+                            BtnProceed.Enabled = true;
+                            PassBox.Enabled = true;
+                            PassBox.Focus();
+                        });
+
+                        string error = "unknown error";
+                        if (ex is CryptographicException)
+                        {
+                            if (ex.Message.ToLower().Contains("not a complete block"))
+                                error = "Supplied file is corrupt";
+                            else if (ex.Message.ToLower().Contains("padding is invalid"))
+                                error = "Incorrect password";
                         }
+                        else if (ex is IOException)
+                        {
+                            error = "IO error occurred";
+                        }
+                        FastAlert(error);
+                        this.Invoke((MethodInvoker)delegate
+                        {
+                            Transition.run(Title, "Text", "Error Occurred", new TransitionType_EaseInEaseOut(250));
+                        });
                     }
                 }
-                if (cancellation.IsCancellationRequested) return;
-                try_write:
-                try { File.WriteAllBytes(file, result); }
-                catch (IOException ex)
-                {
-                    DialogResult res = MessageBox.Show(ex.Message, "IO Error", MessageBoxButtons.AbortRetryIgnore);
-                    if (res == DialogResult.Abort) return;
-                    else if (res == DialogResult.Retry) goto try_write;
-                    else if (res == DialogResult.Ignore) continue;
-                }
-                if (fileEncrypted) File.Move(file, file.Replace(".zv", ""));
-                else File.Move(file, file + ".zv");
-                completed++;
-                this.PassBox.Invoke((MethodInvoker)delegate
-                {
-                    this.PassBox.Enabled = true;
-                    PassBox.Focus();
-                });
             }
-
-            this.Invoke((MethodInvoker)delegate
-            {
-                Transition.run(this.Title, "Text", (fileEncrypted ? "Unlocked!" : "Locked!"), new TransitionType_EaseInEaseOut(250));
-                this.PassBox.Text = "";
-                this.MidTxt.Text = "Cool, waiting for another one..";
-                this.MidTxt.Dock = DockStyle.Fill;
-                this.Panel.Hide();
-                this.Panel.Enabled = false;
-                this.BtnProceed.Enabled = true;
-                this.disableLinkedDrop = false;
-            });
         }
     }
 }
