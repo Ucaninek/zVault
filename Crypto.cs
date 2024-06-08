@@ -1,14 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Security.Cryptography;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace zVault
- {
+{
     internal class Crypto
     {
         private const int ChunkSize = 4096;
@@ -192,12 +189,7 @@ namespace zVault
             const int SaltSize = 16;
             const int IterationCount = 10000;
 
-            byte[] salt;
-            using (RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider())
-            {
-                salt = new byte[SaltSize];
-                rng.GetBytes(salt);
-            }
+            byte[] salt = new byte[SaltSize] { 231, 83, 149, 96, 248, 113, 110, 215, 247, 48, 89, 255, 48, 40, 60,77};
 
             using (Rfc2898DeriveBytes pbkdf2 = new Rfc2898DeriveBytes(password, salt, IterationCount))
             {
