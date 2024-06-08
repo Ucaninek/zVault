@@ -102,23 +102,25 @@ namespace zVault
                 return;
             }
 
+            Transition.run(Title, "Text", (files.Length > 1 ? "Lock Files" : "Lock a File"), new TransitionType_EaseInEaseOut(250));
+
             if (files[0].EndsWith(".zv") || files[0].EndsWith(".zVault"))
             {
-                Transition.run(Title, "Text", (files.Length > 1 ? "Unlock Files" : "Unlock a File"), new TransitionType_EaseInEaseOut(250));
                 Transition.run(MidTxt, "Text", String.Format("Enter the password for {0}", files.Length > 1 ? files.Length + " files" : Path.GetFileName(files[0].Replace(".zv", ""))), new TransitionType_EaseInEaseOut(150));
             }
             else
             {
-                Transition.run(Title, "Text", (files.Length > 1 ? "Lock Files" : "Lock a File"), new TransitionType_EaseInEaseOut(250));
                 Transition.run(MidTxt, "Text", String.Format("Create a password for {0}", files.Length > 1 ? files.Length + " files" : Path.GetFileName(files[0])), new TransitionType_EaseInEaseOut(150));
             }
+
+            Transition t = new Transition(new TransitionType_EaseInEaseOut(250));
+            t.add(MidTxt, "Height", MidTxt.Height - 40);
+            t.run();
+
             MidTxt.Dock = DockStyle.Top;
             Panel.Show();
             Panel.Enabled = true;
             this.files = files;
-            Transition t = new Transition(new TransitionType_EaseInEaseOut(250));
-            t.add(MidTxt, "Height", MidTxt.Height - (PassBox.Height + 16));
-            t.run();
             PassBox.Focus();
         }
 
@@ -145,12 +147,9 @@ namespace zVault
             Title.Text = "Welcome Back";
             MidTxt.Text = midTextDefault;
 
+
             cancellationSource.Cancel(); //cancel after text change so detailed text from Crypto can be shown
 
-            Transition t = new Transition(new TransitionType_EaseInEaseOut(250));
-            t.add(MidTxt, "Height", midHeightDefault);
-            t.add(this, "BackColor", SystemColors.Control);
-            t.run();
             MidTxt.Dock = DockStyle.Fill;
             Panel.Hide();
             Panel.Enabled = false;
@@ -214,10 +213,6 @@ namespace zVault
                         Panel.Enabled = false;
                         BtnProceed.Enabled = true;
                         disableLinkedDrop = false;
-
-                        Transition t = new Transition(new TransitionType_EaseInEaseOut(250));
-                        t.add(MidTxt, "Height", midHeightDefault);
-                        t.run();
                     });
 
                     if (cancellation.IsCancellationRequested) return;
