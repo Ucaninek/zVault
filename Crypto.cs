@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace zVault
  {
-    internal class CryptoV2
+    internal class Crypto
     {
         private const int ChunkSize = 4096;
 

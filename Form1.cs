@@ -169,12 +169,12 @@ namespace zVault
                 {
                     try
                     {
-                        result = await CryptoV2.DecryptFileAsync(file, password, cancellation, new Progress<int>(progress =>
+                        result = await zVault.Crypto.DecryptFileAsync(file, password, cancellation, new Progress<int>(progress =>
                         {
                             // Update the progress UI
                             this.Invoke((MethodInvoker)delegate
                             {
-                                MidTxt.Text = String.Format("Decrypting {0} - ({3}%)", Path.GetFileName(file), completed + 1, files.Length, progress);
+                                MidTxt.Text = string.Format("Decrypting {0} - ({3}%)", Path.GetFileName(file), completed + 1, files.Length, progress);
                             });
                         }));
                     }
@@ -231,12 +231,12 @@ namespace zVault
                     try
                     {
                         // Encrypt the file using IProgress
-                        result = await CryptoV2.EncryptFileAsync(file, password, cancellation, new Progress<int>(progress =>
+                        result = await zVault.Crypto.EncryptFileAsync(file, password, cancellation, new Progress<int>(progress =>
                         {
                             // Update the progress UI
                             this.Invoke((MethodInvoker)delegate
                             {
-                                this.MidTxt.Text = String.Format("Encrypting {0} - ({3}%)", Path.GetFileName(file), completed + 1, files.Length, progress);
+                                this.MidTxt.Text = string.Format("Encrypting {0} - ({3}%)", Path.GetFileName(file), completed + 1, files.Length, progress);
                             });
                         }));
                     } catch (Exception ex)
