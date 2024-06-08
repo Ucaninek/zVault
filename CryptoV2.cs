@@ -131,8 +131,6 @@ namespace zVault
                                 // Check for cancellation
                                 if (cancellationToken.IsCancellationRequested)
                                 {
-                                    // Clean up any resources and throw a cancellation exception
-                                    // or return null to indicate cancellation
                                     throw new OperationCanceledException(cancellationToken);
                                 }
                             }
@@ -177,8 +175,6 @@ namespace zVault
                                 // Check for cancellation
                                 if (cancellationToken.IsCancellationRequested)
                                 {
-                                    // Clean up any resources and throw a cancellation exception
-                                    // or return null to indicate cancellation
                                     throw new OperationCanceledException(cancellationToken);
                                 }
                             }
@@ -190,12 +186,22 @@ namespace zVault
             }
         }
 
+        // Generate a secure key using a salt and iteration count
         private static byte[] GetHashedKey(string password)
         {
-            using (SHA256 sha256 = SHA256.Create())
+            const int SaltSize = 16;
+            const int IterationCount = 10000;
+
+            byte[] salt;
+            using (RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider())
             {
-                byte[] passwordBytes = Encoding.UTF8.GetBytes(password);
-                return sha256.ComputeHash(passwordBytes);
+                salt = new byte[SaltSize];
+                rng.GetBytes(salt);
+            }
+
+            using (Rfc2898DeriveBytes pbkdf2 = new Rfc2898DeriveBytes(password, salt, IterationCount))
+            {
+                return pbkdf2.GetBytes(32); // 256-bit key
             }
         }
     }
