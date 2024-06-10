@@ -66,7 +66,7 @@ namespace zVault
         {
             MidTxt.ForeColor = SystemColors.ButtonShadow;
             Transition.run(MidTxt, "Text", s, new TransitionType_EaseInEaseOut(1));
-            Transition.run(MidTxt, "ForeColor", Color.Maroon, new TransitionType_Flash(3, 500));
+            Transition.run(MidTxt, "ForeColor", Color.Maroon, new TransitionType_Flash(2, 500));
         }
 
         private void Form1_DragLeave(object sender, EventArgs e)
