@@ -11,6 +11,7 @@ namespace zVault
 {
     public partial class Form1 : Form
     {
+        int? midHeightDefault;
         string midTextDefault = null;
         string[] files = null;
         bool linkedOpen = false;
