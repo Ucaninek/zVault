@@ -50,9 +50,16 @@ namespace zVault
             if (disableLinkedDrop && linkedOpen) return;
             if (disableDragDrop) return;
             string[] _files = (string[])e.Data.GetData(DataFormats.FileDrop, false);
-            if (File.Exists(_files[0])) e.Effect = DragDropEffects.Copy;
-            Transition.run(this, "BackColor", Color.White, new TransitionType_EaseInEaseOut(150));
-            Transition.run(MidTxt, "Text", "drop it here", new TransitionType_EaseInEaseOut(150));
+            if (File.Exists(_files[0])) {
+                e.Effect = DragDropEffects.Copy;
+                Transition.run(this, "BackColor", Color.White, new TransitionType_EaseInEaseOut(150));
+                Transition.run(MidTxt, "Text", "drop it here", new TransitionType_EaseInEaseOut(150));
+            }
+            else
+            {
+                Transition.run(MidTxt, "Text", "that wont work :(", new TransitionType_EaseInEaseOut(150));
+            }
+
         }
 
         private void FastAlert(string s)
