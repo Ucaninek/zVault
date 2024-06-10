@@ -249,7 +249,7 @@ namespace zVault
                             PassBox.Focus();
                         });
 
-                        string error = "unknown error";
+                        string error = ex.Message;
                         if (ex is CryptographicException)
                         {
                             if (ex.Message.ToLower().Contains("not a complete block"))
