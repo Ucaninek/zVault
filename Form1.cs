@@ -152,7 +152,7 @@ namespace zVault
             if (linkedOpen) Environment.Exit(0);
             Title.Text = "Welcome Back";
             MidTxt.Text = midTextDefault;
-
+            PassBox.Clear();
 
             cancellationSource.Cancel(); //cancel after text change so detailed text from Crypto can be shown
 
