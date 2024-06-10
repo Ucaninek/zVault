@@ -68,7 +68,7 @@
             this.Title.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.Title.Size = new System.Drawing.Size(268, 45);
             this.Title.TabIndex = 0;
-            this.Title.Text = "Welcome Back\r\n";
+            this.Title.Text = "Hello There";
             this.Title.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // Panel
