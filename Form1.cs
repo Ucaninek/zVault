@@ -12,7 +12,6 @@ namespace zVault
     public partial class Form1 : Form
     {
         string midTextDefault = null;
-        int? midHeightDefault = null;
         string[] files = null;
         bool linkedOpen = false;
         bool disableLinkedDrop = true;
@@ -66,7 +65,7 @@ namespace zVault
         {
             MidTxt.ForeColor = SystemColors.ButtonShadow;
             Transition.run(MidTxt, "Text", s, new TransitionType_EaseInEaseOut(1));
-            Transition.run(MidTxt, "ForeColor", Color.Maroon, new TransitionType_Flash(3, 500));
+            Transition.run(MidTxt, "ForeColor", Color.Maroon, new TransitionType_Flash(2, 500));
         }
 
         private void Form1_DragLeave(object sender, EventArgs e)
