@@ -109,14 +109,15 @@ namespace zVault
                 return;
             }
 
-            Transition.run(Title, "Text", (files.Length > 1 ? "Lock Files" : "Lock a File"), new TransitionType_EaseInEaseOut(250));
 
             if (files[0].EndsWith(".zv") || files[0].EndsWith(".zVault"))
             {
+                Transition.run(Title, "Text", (files.Length > 1 ? "Unlock Files" : "Unlock a File"), new TransitionType_EaseInEaseOut(250));
                 Transition.run(MidTxt, "Text", String.Format("Enter the password for {0}", files.Length > 1 ? files.Length + " files" : Path.GetFileName(files[0].Replace(".zv", ""))), new TransitionType_EaseInEaseOut(150));
             }
             else
             {
+                Transition.run(Title, "Text", (files.Length > 1 ? "Lock Files" : "Lock a File"), new TransitionType_EaseInEaseOut(250));
                 Transition.run(MidTxt, "Text", String.Format("Create a password for {0}", files.Length > 1 ? files.Length + " files" : Path.GetFileName(files[0])), new TransitionType_EaseInEaseOut(150));
             }
 
